@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'  
@@ -44,5 +45,24 @@ def delete(id):
     except:
         return "There was a problem deleting data."
 
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
+def update(id):
+    grocery = Grocery.query.get_or_404(id)
+
+    if request.method == 'POST':
+        grocery.name = request.form['name']
+
+        try:
+            db.session.commit()
+            return redirect('/')
+        except:
+            return "There was a problem updating data."
+
+    else:
+        title = "Update Data"
+        return render_template('update.html', title=title, grocery=grocery)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
